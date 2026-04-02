@@ -1,5 +1,14 @@
 package main
 
-func main() {
+import (
+	"log"
+	"os"
 
+	"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/server"
+)
+
+func main() {
+	logger := log.New(os.Stderr, "", log.LstdFlags)
+	server := server.CreateNewServer(logger)
+	log.Fatal(server.Server.ListenAndServe())
 }
