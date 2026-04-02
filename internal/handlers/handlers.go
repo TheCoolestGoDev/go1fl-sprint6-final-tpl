@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
+	"os"
 
-	"github.com/Yandex-Practicum/go1fl-sprint6-final/pkg/morse"
+	"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/service"
 )
 
 func HandlerForm(w http.ResponseWriter, r *http.Request) {
@@ -14,23 +14,31 @@ func HandlerForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandlerUpload(w http.ResponseWriter, r *http.Request) {
-	file, _, err := r.FormFile("myFile")
-	if err != nil {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	result := make([]byte, 32)
-	result, err = io.ReadAll(file)
+	file, _, err := r.FormFile("myFile")
+	if err != nil {
+		fmt.Println("Ошибка отображения файла")
+		return
+	}
+	result, err := io.ReadAll(file)
 	result = append(result, ' ')
 	if err != nil {
 		fmt.Println("Ошибка чтения файла")
 		return
 	}
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.Write(result)
-	lettersonly := regexp.MustCompile(`^[\p{Cyrillic}\s-]+$`)
-	if lettersonly.MatchString(string(result)) {
-		w.Write([]byte(morse.ToMorse(string(result))))
-	} else {
-		w.Write([]byte(morse.ToText(string(result))))
+	resultFile, err := os.Create("resultFile.txt")
+	if err != nil {
+		fmt.Println("Ошибка создания файла")
+		return
 	}
+	defer resultFile.Close()
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	resultFile.WriteString(string(result))
+	w.Write(result)
+	resultFile.WriteString(service.IsTextOrNot(string(result)))
+	w.Write([]byte(service.IsTextOrNot(string(result))))
 }

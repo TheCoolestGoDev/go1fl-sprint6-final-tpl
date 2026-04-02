@@ -15,7 +15,13 @@ type ServerEx struct {
 
 func CreateNewServer(l *log.Logger) *ServerEx {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handlers.HandlerForm)
-	mux.HandleFunc("/upload", handlers.HandlerUpload)
-	return &ServerEx{Log: l, Server: http.Server{Addr: ":8080", Handler: mux, ErrorLog: l, ReadTimeout: 5 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 15 * time.Second}}
+	mux.HandleFunc("GET /", handlers.HandlerForm)
+	mux.HandleFunc("POST /upload", handlers.HandlerUpload)
+	return &ServerEx{Log: l,
+		Server: http.Server{Addr: ":8080",
+			Handler:      mux,
+			ErrorLog:     l,
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 10 * time.Second,
+			IdleTimeout:  15 * time.Second}}
 }
